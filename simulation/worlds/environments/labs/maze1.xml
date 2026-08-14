@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    Lab 1 — Kinematics
+    Empty 10 x 10 m room. Boundary walls only, no obstacles or landmarks.
+    Robot starts at the origin facing North.
+-->
+
+<environment>
+
+    <wall x1="-5.00" y1=" 5.00" x2=" 5.00" y2=" 5.00" type="boundary" height="0.5" width="0.012"/>
+    <wall x1=" 5.00" y1=" 5.00" x2=" 5.00" y2="-5.00" type="boundary" height="0.5" width="0.012"/>
+    <wall x1=" 5.00" y1="-5.00" x2="-5.00" y2="-5.00" type="boundary" height="0.5" width="0.012"/>
+    <wall x1="-5.00" y1="-5.00" x2="-5.00" y2=" 5.00" type="boundary" height="0.5" width="0.012"/>
+
+    <train_start_positions>
+        <pos x="0.0" y="0.0" theta="1.5708"/>
+    </train_start_positions>
+
+    <test_start_positions>
+        <pos x="0.0" y="0.0" theta="1.5708"/>
+    </test_start_positions>
+
+    <goal id="0" x="0.0" y="0.0"/>
+
+</environment>

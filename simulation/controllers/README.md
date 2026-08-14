@@ -11,7 +11,7 @@ This guide assumes you have already completed the [REALM setup](../../README.md)
 
 ## How to Create a New Webots Robot Controller
 
-**1.** Launch Webots and open the world file located at `REALM/simulation/worlds/empty_room.wbt`
+**1.** Launch Webots and open the world file located at `simulation/worlds/mobile_robots.wbt`
 
 **2.** Within the Webots GUI select: `File → New → New Robot Controller...`
 
@@ -99,7 +99,7 @@ while robot.experiment_supervisor.step(robot.timestep) != -1:
 
 ## How to Assign a Controller to the Robot
 
-**1.** Launch Webots and open the world file at `REALM/simulation/worlds/empty_room.wbt`
+**1.** Launch Webots and open the world file at `simulation/worlds/mobile_robots.wbt`
 
 **2.** In the left scene panel, expand the `HamBot` node
 
