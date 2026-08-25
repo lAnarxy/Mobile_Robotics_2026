@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    Lab 2 — PID Navigation Control
+    Straight 7 m (E-W) x 1 m (N-S) corridor, centered at (0, 0).
+    Boundary walls only.
+    Robot starts at the west end (x = -3.0, y = 0) facing East (theta = 0).
+    Supports the full 9-step motion sequence.
+-->
+
+<environment>
+
+    <!-- Corridor boundary walls -->
+    <wall x1="-3.50" y1=" 0.50" x2=" 3.50" y2=" 0.50" type="boundary" height="0.5" width="0.012"/>
+    <wall x1=" 3.50" y1=" 0.50" x2=" 3.50" y2="-0.50" type="boundary" height="0.5" width="0.012"/>
+    <wall x1=" 3.50" y1="-0.50" x2="-3.50" y2="-0.50" type="boundary" height="0.5" width="0.012"/>
+    <wall x1="-3.50" y1="-0.50" x2="-3.50" y2=" 0.50" type="boundary" height="0.5" width="0.012"/>
+
+    <train_start_positions>
+        <pos x="-3.00" y="0.0" theta="0.0"/>
+    </train_start_positions>
+
+    <test_start_positions>
+        <pos x="-3.00" y="0.0" theta="0.0"/>
+    </test_start_positions>
+
+    <goal id="0" x="3.00" y="0.0"/>
+
+</environment>
