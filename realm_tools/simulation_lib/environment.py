@@ -40,7 +40,9 @@ class Environment:
         for i, w in enumerate(walls):
             wall = Wall(w['x1'], w['y1'], w['x2'], w['y2'],
                         height=w['height'], width=w['width'],
-                        wall_type=w['wall_type'], texture=w['texture'], id=i)
+                        wall_type=w['wall_type'], texture=w['texture'],
+                        texture_length=w['texture_length'],
+                        texture_height=w['texture_height'], id=i)
             if w['wall_type'] == 'boundary':
                 self.boundary_walls.append(wall)
             else:
@@ -122,13 +124,16 @@ class StartingPosition(EnvironmentPoint):
 
 
 class Wall:
-    def __init__(self, x1, y1, x2, y2, height=0.3, width=0.012, wall_type='obstacle', texture=None, id=0):
+    def __init__(self, x1, y1, x2, y2, height=0.3, width=0.012, wall_type='obstacle', texture=None,
+                 texture_length=None, texture_height=None, id=0):
         self.x1, self.y1 = x1, y1
         self.x2, self.y2 = x2, y2
         self.height = height
         self.width = width
         self.wall_type = wall_type
         self.texture = texture
+        self.texture_length = texture_length
+        self.texture_height = texture_height
         self.id = id
         self.length = math.dist((x1, y1), (x2, y2))
         cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
@@ -148,9 +153,29 @@ class Wall:
             node += (
                 f' appearance PBRAppearance {{ '
                 f'baseColorMap ImageTexture {{ url ["{self.texture}"] }} '
+                f'{self._texture_transform_string()}'
                 f'metalness 0 roughness 0.5 }}'
             )
         return node + ' }'
+
+    def _texture_transform_string(self):
+        """Tile the texture at a fixed physical size instead of stretching it.
+
+        wall.proto maps UVs metrically against the longest edge: the visible
+        face spans u in [0, length / max_edge] and v in [0, height / max_edge].
+        Scaling the texture coordinates by max_edge / tile therefore yields one
+        full copy of the image per `tile` metres. Returns '' when no tile size
+        was given, leaving the proto's stretch-to-fit behaviour untouched.
+        """
+        if not self.texture_length and not self.texture_height:
+            return ''
+        tile_u = self.texture_length or self.texture_height
+        tile_v = self.texture_height or self.texture_length
+        max_edge = max(self.width, self.length, self.height)
+        return (
+            f'textureTransform TextureTransform {{ '
+            f'scale {max_edge / tile_u:.3f} {max_edge / tile_v:.3f} }} '
+        )
 
 
 class Landmark:

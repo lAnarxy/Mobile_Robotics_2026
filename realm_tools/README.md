@@ -144,7 +144,7 @@ class MyRobot(HamBot): ...
 | `teleport_robot(x, y, z, theta)` | Instantly move the robot to a pose |
 | `load_environment(maze_file)` | Load an XML maze (walls, obstacles, landmarks) |
 | `reset_environment()` | Remove all loaded maze nodes and reset |
-| `move_to_start(mode='training', index=0)` | Move robot to a start position. `mode`: `'training'` or `'testing'`. `index`: position index, or `-1` for random. Falls back to random on invalid input. |
+| `move_to_start(mode='testing', index=-1)` | Move robot to a start position. `mode`: `'testing'` (default) or `'training'`. `index`: position index, or `-1` for a random one (the default). Falls back to random on invalid input. |
 | `check_at_goal()` | Returns `True` if robot is within range of the goal |
 | `get_dist_to_goal()` | Distance to goal in meters |
 | `update_robot_display(name='default')` | Load and scale an image from `data/DataCache/` to fill the robot display |
@@ -189,8 +189,8 @@ robot = MyRobot()
 # Load the environment from a maze file
 robot.load_environment('simulation/worlds/mazes/samples/WM00.xml')
 
-# Move robot to training start position 0
-robot.move_to_start(mode='training', index=0)
+# Move robot to a random testing start position
+robot.move_to_start()
 
 # Record starting encoder values (radians)
 left_encoder_start  = robot.get_left_motor_encoder_reading()

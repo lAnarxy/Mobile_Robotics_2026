@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    maze3 — Lab 3: Bug0 Navigation
+    Open plan with no enclosing boundary. Seven 1 m-thick obstacle walls
+    partition the floor, giving the robot obstacle boundaries to follow around
+    on its way to the goal direction. A tall yellow cylinder landmark marks the
+    west chamber.
+    Start pose is at (3, 0) facing East.
+
+    Note: with no boundary walls this environment cannot be used with
+    start_position_generator.py, which requires a closed boundary polygon.
+    Walls here are free-standing obstacles, not on the 1 m cell grid.
+
+    Ported from FAIRIS-Lite Spring26/maze6.xml.
+-->
+
+<environment>
+
+    <!-- Thick obstacle walls -->
+    <wall x1="-5.00" y1=" 1.50" x2=" 5.00" y2=" 1.50" type="obstacle" height="0.5" width="1.0"/>
+    <wall x1=" 4.50" y1=" 2.00" x2=" 4.50" y2=" 3.50" type="obstacle" height="0.5" width="1.0"/>
+    <wall x1="-6.00" y1="-2.50" x2="-2.00" y2="-2.50" type="obstacle" height="0.5" width="1.0"/>
+    <wall x1=" 0.50" y1="-4.00" x2=" 0.50" y2=" 1.00" type="obstacle" height="0.5" width="1.0"/>
+    <wall x1=" 1.00" y1="-2.50" x2=" 5.00" y2="-2.50" type="obstacle" height="0.5" width="1.0"/>
+    <wall x1="-3.50" y1="-2.00" x2="-3.50" y2=" 1.00" type="obstacle" height="0.5" width="1.0"/>
+    <wall x1="-3.50" y1=" 2.00" x2="-3.50" y2=" 3.50" type="obstacle" height="0.5" width="1.0"/>
+
+    <!-- Tall distal cue -->
+    <landmark type="cylinder" x="-2.50" y=" 0.00" height="5.0" radius="0.25"
+              red="1.00" green="1.00" blue="0.00"/>
+
+    <test_start_positions>
+        <pos x="3.00" y="0.00" theta="0.0"/>
+    </test_start_positions>
+
+</environment>

@@ -2,25 +2,19 @@
 
 <!--
     Lab 1 — Kinematics
-    Empty 10 x 10 m room. Boundary walls only, no obstacles or landmarks.
+    Fully open environment. No walls, no obstacles, no landmarks — the robot
+    drives on unbounded floor, so odometry can be exercised without any
+    collision to interrupt it.
     Robot starts at the origin facing North.
+
+    Note: with no boundary walls this environment cannot be used with
+    start_position_generator.py, which requires a closed boundary polygon.
 -->
 
 <environment>
 
-    <wall x1="-5.00" y1=" 5.00" x2=" 5.00" y2=" 5.00" type="boundary" height="0.5" width="0.012"/>
-    <wall x1=" 5.00" y1=" 5.00" x2=" 5.00" y2="-5.00" type="boundary" height="0.5" width="0.012"/>
-    <wall x1=" 5.00" y1="-5.00" x2="-5.00" y2="-5.00" type="boundary" height="0.5" width="0.012"/>
-    <wall x1="-5.00" y1="-5.00" x2="-5.00" y2=" 5.00" type="boundary" height="0.5" width="0.012"/>
-
-    <train_start_positions>
-        <pos x="0.0" y="0.0" theta="1.5708"/>
-    </train_start_positions>
-
     <test_start_positions>
         <pos x="0.0" y="0.0" theta="1.5708"/>
     </test_start_positions>
-
-    <goal id="0" x="0.0" y="0.0"/>
 
 </environment>

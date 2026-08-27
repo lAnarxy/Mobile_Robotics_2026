@@ -39,10 +39,31 @@ Walls are defined by two endpoints. The parser computes the center, length, and 
 | `height` | no | `0.3` | Wall height in meters |
 | `width` | no | `0.012` | Wall thickness in meters |
 | `texture` | no | proto default | Path to texture image, relative to the world file |
+| `texture_length` | no | — | Metres spanned by one copy of the texture along the wall |
+| `texture_height` | no | `texture_length` | Metres spanned by one copy of the texture vertically |
 
 **`boundary`** walls define the outer enclosure. **`obstacle`** walls are internal.
 
 If `texture` is omitted the `wall.proto` default (black marble) is used.
+
+### Tiling a texture
+
+By default `wall.proto` maps the image across the wall's longest edge, so a
+single copy is stretched over the whole wall. Set `texture_length` (and
+optionally `texture_height`) to repeat the image at a fixed physical size
+instead:
+
+```xml
+<wall x1="-3.50" y1=" 0.50" x2=" 3.50" y2=" 0.50" type="boundary" height="0.5" width="0.024"
+      texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+      texture_length="1.0" texture_height="0.5"/>
+```
+
+That gives one copy of the brick image per 1.0 m of wall length and per 0.5 m
+of height, so a 7 m wall shows seven tiles rather than one stretched one.
+Choose a ratio matching the image's aspect (`white_brick.png` is 2:1, hence
+1.0 x 0.5) to avoid distorting it. Omit both attributes to keep the original
+stretch-to-fit behaviour.
 
 ---
 

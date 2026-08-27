@@ -57,8 +57,8 @@ robot = MyRobot()
 # Load the environment from a maze file
 robot.load_environment('simulation/worlds/mazes/Samples/WM00.xml')
 
-# Move robot to training start position 0
-robot.move_to_start(mode='training', index=0)
+# Move robot to a random testing start position
+robot.move_to_start()
 
 # Record starting encoder values (radians)
 left_encoder_start  = robot.get_left_motor_encoder_reading()

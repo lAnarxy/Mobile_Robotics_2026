@@ -1,6 +1,11 @@
 import xml.etree.ElementTree as ET
 
 
+def _opt_float(value):
+    """Return float(value), or None when the attribute is absent."""
+    return None if value is None else float(value)
+
+
 def parse_wall(xml_wall):
     return {
         'x1':        float(xml_wall.get('x1')),
@@ -11,6 +16,8 @@ def parse_wall(xml_wall):
         'width':     float(xml_wall.get('width', 0.012)),
         'wall_type': xml_wall.get('type', 'obstacle'),
         'texture':   xml_wall.get('texture', None),
+        'texture_length': _opt_float(xml_wall.get('texture_length')),
+        'texture_height': _opt_float(xml_wall.get('texture_height')),
     }
 
 

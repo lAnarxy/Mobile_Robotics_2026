@@ -216,7 +216,7 @@ class HamBot(Supervisor):
         self.robot_node.resetPhysics()
         self.sensor_calibration(stop_num=0)  # 1 step is enough post-teleport
 
-    def move_to_start(self, mode='testing', index=0):
+    def move_to_start(self, mode='testing', index=-1):
         if mode == 'training':
             locations = self.maze.training_starting_location
             get_random = self.maze.get_random_training_starting_position

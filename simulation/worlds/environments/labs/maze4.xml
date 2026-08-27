@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    maze4 — Lab 4a: Trilateration
+    5 x 5 m arena, boundary walls only — deliberately open, with no interior
+    walls, so every one of the four corner cues stays visible from anywhere on
+    the floor. Four tall cylinder landmarks (yellow / red / green / blue) give
+    unique bearings to trilaterate against.
+
+    All 25 cell centres are testing start poses, so a solution has to hold
+    across the whole arena rather than from one spot.
+
+    Ported from FAIRIS-Lite Spring26/maze7.xml.
+-->
+
+<environment>
+
+    <!-- Boundary walls -->
+    <wall x1="-2.50" y1=" 2.50" x2=" 2.50" y2=" 2.50" type="boundary" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1=" 2.50" y1=" 2.50" x2=" 2.50" y2="-2.50" type="boundary" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1=" 2.50" y1="-2.50" x2="-2.50" y2="-2.50" type="boundary" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1="-2.50" y1="-2.50" x2="-2.50" y2=" 2.50" type="boundary" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+
+    <!-- Distal corner cues -->
+    <landmark type="cylinder" x="-2.50" y=" 2.50" height="4.5" radius="0.25"
+              red="1.00" green="1.00" blue="0.00"/>
+    <landmark type="cylinder" x=" 2.50" y=" 2.50" height="4.5" radius="0.25"
+              red="1.00" green="0.00" blue="0.00"/>
+    <landmark type="cylinder" x="-2.50" y="-2.50" height="4.5" radius="0.25"
+              red="0.00" green="1.00" blue="0.00"/>
+    <landmark type="cylinder" x=" 2.50" y="-2.50" height="4.5" radius="0.25"
+              red="0.00" green="0.00" blue="1.00"/>
+
+    <test_start_positions>
+        <pos x="-2.00" y=" 2.00" theta="1.5708"/>
+        <pos x="-1.00" y=" 2.00" theta="1.5708"/>
+        <pos x=" 0.00" y=" 2.00" theta="1.5708"/>
+        <pos x=" 1.00" y=" 2.00" theta="1.5708"/>
+        <pos x=" 2.00" y=" 2.00" theta="1.5708"/>
+
+        <pos x="-2.00" y=" 1.00" theta="1.5708"/>
+        <pos x="-1.00" y=" 1.00" theta="1.5708"/>
+        <pos x=" 0.00" y=" 1.00" theta="1.5708"/>
+        <pos x=" 1.00" y=" 1.00" theta="1.5708"/>
+        <pos x=" 2.00" y=" 1.00" theta="1.5708"/>
+
+        <pos x="-2.00" y=" 0.00" theta="1.5708"/>
+        <pos x="-1.00" y=" 0.00" theta="1.5708"/>
+        <pos x=" 0.00" y=" 0.00" theta="1.5708"/>
+        <pos x=" 1.00" y=" 0.00" theta="1.5708"/>
+        <pos x=" 2.00" y=" 0.00" theta="1.5708"/>
+
+        <pos x="-2.00" y="-1.00" theta="1.5708"/>
+        <pos x="-1.00" y="-1.00" theta="1.5708"/>
+        <pos x=" 0.00" y="-1.00" theta="1.5708"/>
+        <pos x=" 1.00" y="-1.00" theta="1.5708"/>
+        <pos x=" 2.00" y="-1.00" theta="1.5708"/>
+
+        <pos x="-2.00" y="-2.00" theta="1.5708"/>
+        <pos x="-1.00" y="-2.00" theta="1.5708"/>
+        <pos x=" 0.00" y="-2.00" theta="1.5708"/>
+        <pos x=" 1.00" y="-2.00" theta="1.5708"/>
+        <pos x=" 2.00" y="-2.00" theta="1.5708"/>
+    </test_start_positions>
+
+</environment>

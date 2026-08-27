@@ -11,19 +11,21 @@
 <environment>
 
     <!-- Corridor boundary walls -->
-    <wall x1="-3.50" y1=" 0.50" x2=" 3.50" y2=" 0.50" type="boundary" height="0.5" width="0.012"/>
-    <wall x1=" 3.50" y1=" 0.50" x2=" 3.50" y2="-0.50" type="boundary" height="0.5" width="0.012"/>
-    <wall x1=" 3.50" y1="-0.50" x2="-3.50" y2="-0.50" type="boundary" height="0.5" width="0.012"/>
-    <wall x1="-3.50" y1="-0.50" x2="-3.50" y2=" 0.50" type="boundary" height="0.5" width="0.012"/>
-
-    <train_start_positions>
-        <pos x="-3.00" y="0.0" theta="0.0"/>
-    </train_start_positions>
+    <wall x1="-3.50" y1=" 0.50" x2=" 3.50" y2=" 0.50" type="boundary" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1=" 3.50" y1=" 0.50" x2=" 3.50" y2="-0.50" type="boundary" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1=" 3.50" y1="-0.50" x2="-3.50" y2="-0.50" type="boundary" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1="-3.50" y1="-0.50" x2="-3.50" y2=" 0.50" type="boundary" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
 
     <test_start_positions>
         <pos x="-3.00" y="0.0" theta="0.0"/>
     </test_start_positions>
-
-    <goal id="0" x="3.00" y="0.0"/>
 
 </environment>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+    maze6 — Lab 5: Path Planning
+    5 x 5 m maze on a 1 m cell grid. Boundary walls plus interior walls that
+    run along cell edges and start/end on cell corners. Every one of the 25
+    cells is reachable, no cell is left without a wall, and no 2 x 2 block is
+    fully open. Four coloured corner cues (yellow / red / green / blue) match
+    maze4 and maze5, so the localisation built in Lab 4 carries over.
+
+    Recommended goal: the centre cell, world (0.0, 0.0).
+
+    This maze is built to catch a mis-coded planner. It is deliberately
+    braided (2 loops) rather than perfect: in a perfect maze only one route
+    exists, so a planner that never compares path costs still returns the only
+    answer and the bug stays hidden. Here most cells have two routes to the
+    centre, and they are not the same length.
+
+    Measured against the centre goal:
+      - From 16 of the 24 non-goal cells, greedily stepping toward the goal
+        walks into a dead end. Hill-climbing on a heuristic cannot finish.
+      - 21 of 24 cells have a genuine choice of route. Taking the wrong branch
+        at the first junction costs on average 8.7 extra hops, and up to 18.
+      - From 10 of 24 cells the optimal first step moves AWAY from the goal in
+        Manhattan terms, so a planner that refuses to increase distance fails.
+
+    A correct Dijkstra or wavefront expansion resolves all of these; a
+    best-first or greedy descent does not.
+
+    All 25 cell centres are testing start poses.
+-->
+
+<environment>
+
+    <!-- Boundary walls -->
+    <wall x1="-2.50" y1=" 2.50" x2=" 2.50" y2=" 2.50" type="boundary" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1=" 2.50" y1=" 2.50" x2=" 2.50" y2="-2.50" type="boundary" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1=" 2.50" y1="-2.50" x2="-2.50" y2="-2.50" type="boundary" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1="-2.50" y1="-2.50" x2="-2.50" y2=" 2.50" type="boundary" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+
+    <!-- Interior walls (on cell edges, endpoints on cell corners) -->
+    <wall x1="-2.50" y1=" 0.50" x2="-1.50" y2=" 0.50" type="obstacle" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1="-1.50" y1="-1.50" x2="-1.50" y2="-0.50" type="obstacle" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1="-1.50" y1="-0.50" x2="-0.50" y2="-0.50" type="obstacle" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1="-1.50" y1=" 0.50" x2="-1.50" y2=" 1.50" type="obstacle" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1="-0.50" y1="-1.50" x2=" 0.50" y2="-1.50" type="obstacle" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1="-0.50" y1="-0.50" x2="-0.50" y2=" 0.50" type="obstacle" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1="-0.50" y1=" 0.50" x2=" 1.50" y2=" 0.50" type="obstacle" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1="-0.50" y1=" 1.50" x2=" 0.50" y2=" 1.50" type="obstacle" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1=" 0.50" y1="-2.50" x2=" 0.50" y2="-0.50" type="obstacle" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+    <wall x1=" 1.50" y1="-1.50" x2=" 1.50" y2=" 1.50" type="obstacle" height="0.5" width="0.024"
+          texture="../protos/world_objects/textures/wall_textures/white_brick.png"
+          texture_length="1.0" texture_height="0.5"/>
+
+    <!-- Distal corner cues -->
+    <landmark type="cylinder" x="-2.50" y=" 2.50" height="4.5" radius="0.25"
+              red="1.00" green="1.00" blue="0.00"/>
+    <landmark type="cylinder" x=" 2.50" y=" 2.50" height="4.5" radius="0.25"
+              red="1.00" green="0.00" blue="0.00"/>
+    <landmark type="cylinder" x="-2.50" y="-2.50" height="4.5" radius="0.25"
+              red="0.00" green="1.00" blue="0.00"/>
+    <landmark type="cylinder" x=" 2.50" y="-2.50" height="4.5" radius="0.25"
+              red="0.00" green="0.00" blue="1.00"/>
+
+    <!-- Every cell centre is a start pose: 25 cells, 0.5 m from any wall -->
+    <test_start_positions>
+        <pos x="-2.00" y=" 2.00" theta="1.5708"/>
+        <pos x="-1.00" y=" 2.00" theta="1.5708"/>
+        <pos x=" 0.00" y=" 2.00" theta="1.5708"/>
+        <pos x=" 1.00" y=" 2.00" theta="1.5708"/>
+        <pos x=" 2.00" y=" 2.00" theta="1.5708"/>
+
+        <pos x="-2.00" y=" 1.00" theta="1.5708"/>
+        <pos x="-1.00" y=" 1.00" theta="1.5708"/>
+        <pos x=" 0.00" y=" 1.00" theta="1.5708"/>
+        <pos x=" 1.00" y=" 1.00" theta="1.5708"/>
+        <pos x=" 2.00" y=" 1.00" theta="1.5708"/>
+
+        <pos x="-2.00" y=" 0.00" theta="1.5708"/>
+        <pos x="-1.00" y=" 0.00" theta="1.5708"/>
+        <pos x=" 0.00" y=" 0.00" theta="1.5708"/>
+        <pos x=" 1.00" y=" 0.00" theta="1.5708"/>
+        <pos x=" 2.00" y=" 0.00" theta="1.5708"/>
+
+        <pos x="-2.00" y="-1.00" theta="1.5708"/>
+        <pos x="-1.00" y="-1.00" theta="1.5708"/>
+        <pos x=" 0.00" y="-1.00" theta="1.5708"/>
+        <pos x=" 1.00" y="-1.00" theta="1.5708"/>
+        <pos x=" 2.00" y="-1.00" theta="1.5708"/>
+
+        <pos x="-2.00" y="-2.00" theta="1.5708"/>
+        <pos x="-1.00" y="-2.00" theta="1.5708"/>
+        <pos x=" 0.00" y="-2.00" theta="1.5708"/>
+        <pos x=" 1.00" y="-2.00" theta="1.5708"/>
+        <pos x=" 2.00" y="-2.00" theta="1.5708"/>
+    </test_start_positions>
+
+</environment>
