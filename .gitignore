@@ -223,6 +223,9 @@ data/data_cache/*
 
 # Generated position grids — run start_position_generator.py to recreate
 simulation/worlds/environments/**/positions/
+
+# Local scratch controller
+simulation/controllers/test/
 !simulation/controllers/Calibration/
 !simulation/controllers/Example/
 *.ini
