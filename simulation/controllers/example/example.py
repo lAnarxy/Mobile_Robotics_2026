@@ -2,13 +2,13 @@ import os
 os.chdir("../../..")
 
 """ExperimentSupervisor controller."""
-from realm_tools.robot_lib.hambot import HamBot
+from realm_tools.robot_lib.my_robot import MyRobot
 
 
 maze_file = 'simulation/worlds/environments/samples/example.xml'
 
 # create the robot/supervisor instance.
-robot = HamBot()
+robot = MyRobot()
 
 # Loads the environment from the maze file
 robot.load_environment(maze_file)

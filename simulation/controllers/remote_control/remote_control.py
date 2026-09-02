@@ -1,12 +1,12 @@
 import os
 os.chdir("../../..")
 
-from realm_tools.robot_lib.hambot import HamBot
+from realm_tools.robot_lib.my_robot import MyRobot
 
 VELOCITY = 15.0
 TURN_VELOCITY = 3.0
 
-robot = HamBot()
+robot = MyRobot()
 robot.load_environment('simulation/worlds/environments/samples/octagon.xml')
 
 keyboard = robot.experiment_supervisor.getKeyboard()
