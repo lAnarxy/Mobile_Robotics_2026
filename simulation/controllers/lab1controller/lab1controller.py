@@ -15,12 +15,11 @@ robot.load_environment(maze_file)
 # Show basic robot/supervisor functions
 robot.move_to_start()
 
-start_time = robot.experiment_supervisor.getTime()
 # Shape Vars
-L = 1
+L = 3
 W = 1
-R1 = 1
-R2 = 1
+R1 = 1.5
+R2 = 0.5
 S = 1
 
 turn_speed = 2
