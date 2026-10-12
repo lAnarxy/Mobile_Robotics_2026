@@ -16,11 +16,11 @@ robot.load_environment(maze_file)
 robot.move_to_start()
 
 # Shape Vars
-L = 3
-W = 1
-R1 = 1.5
-R2 = 0.5
-S = 1
+L = 2
+W = 4
+R1 = 1
+R2 = 2
+S = 1.5
 
 turn_speed = 2
 circle_speed = 10

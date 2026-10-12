@@ -5,6 +5,16 @@ class MyRobot(HamBot):
     def __init__(self):
         HamBot.__init__(self)
 
+    # Saturation function for motor speed
+    def saturation(self, speed):
+        P = 0.8
+        if speed > P * self.max_motor_velocity:
+            speed = P * self.max_motor_velocity
+        elif speed < P * -self.max_motor_velocity:
+            speed = P * -self.max_motor_velocity
+        return speed
+
+    # Drives the robot in a straight line for a specified distance at a specified speed (in rad/sec)
     def drive_straight(self, distance, speed):
         # Caps the robots speed to max velocity
         if speed > self.max_motor_velocity:
@@ -14,8 +24,6 @@ class MyRobot(HamBot):
         left_motor_initial_angle = self.get_left_motor_encoder_reading()
         right_motor_initial_angle = self.get_right_motor_encoder_reading()
         while self.experiment_supervisor.step(self.timestep) != -1:
-
-            print("Max rotational motor velocity: ", self.max_motor_velocity)
 
             # Reads and Prints Robot's Encoder Readings
             print("Motor Encoder Readings: ", self.get_encoder_readings())
@@ -47,7 +55,7 @@ class MyRobot(HamBot):
                 self.stop()
                 break
 
-    #Turns the robot in place by a specified angle (in degrees) at a specified speed (in rad/sec)
+    # Turns the robot in place by a specified angle (in degrees) at a specified speed (in rad/sec)
     def turn_in_place(self, angle, speed):
         # Caps the robots speed to max velocity
         if speed > self.max_motor_velocity:
@@ -95,6 +103,7 @@ class MyRobot(HamBot):
                 self.stop()
                 break
 
+    # Turns the robot on a circle of a specified radius by a specified angle (in degrees) at a specified speed (in rad/sec)
     def turn_on_circle(self, angle, speed, radius):
         # 1 = left -1 = right
         direction = 1 if angle > 0 else -1
@@ -153,3 +162,116 @@ class MyRobot(HamBot):
                 print(f"Time to turn {angle} degrees:{travel_time:.2f}")
                 self.stop()
                 break
+
+    # Moves the robot towards a specified distance using a PID controller based on the lidar reading
+    def move_pid_lidar(self, distance = 1, Kp = 10.0, Ki = 0.1, Kd = 0.5, tolerance = 0.001):
+        I = 0
+        prev_error = 0
+        while self.experiment_supervisor.step(self.timestep) != -1:
+            error = self.get_lidar_range_image()[180] - distance
+
+            print("Moving with PID Lidar:")
+            print(f"Current Lidar Reading: {self.get_lidar_range_image()[180]:.4f}, Error: {error:.4f}")
+
+            P = Kp * error
+            I = Ki * (I + error * self.timestep)
+            D = Kd * (error - prev_error) / self.timestep
+            prev_error = error
+            phi = self.saturation(P + I + D)
+
+            print(f"P: {P:.4f}, I: {I:.4f}, D: {D:.4f}")
+            print(f"PID output (phi): {phi:.4f}")
+
+            self.set_left_motor_velocity(phi)
+            self.set_right_motor_velocity(phi)
+            if abs(error) < tolerance :
+                self.stop()
+                break
+
+    # Moves the robot towards a specified distance using a PID controller based on the encoder reading
+    def move_pid_encoder(self, distance = 1, Kp = 10.0, Ki = 0.1, Kd = 0.5, tolerance = 0.001):
+        I = 0
+        prev_error = 0
+        angle_delta = 0
+        initial = (self.get_left_motor_encoder_reading() + self.get_right_motor_encoder_reading()) / 2
+        while self.experiment_supervisor.step(self.timestep) != -1:
+            current = (self.get_left_motor_encoder_reading() + self.get_right_motor_encoder_reading()) / 2
+            error = distance - (current - initial) * self.wheel_radius
+
+            print("Moving with PID Encoder:")
+            print(f"Moving {'forward' if error > 0 else 'backward'}")
+            print(f"Traveled Distance: {(current - initial) * self.wheel_radius:.4f}, Error: {error:.4f}")
+
+            P = Kp * error
+            I = Ki * (I + error * self.timestep)
+            D = Kd * (error - prev_error) / self.timestep
+            prev_error = error
+            phi = self.saturation(P + I + D)
+
+            print(f"P: {P:.4f}, I: {I:.4f}, D: {D:.4f}")
+            print(f"PID output (phi): {phi:.4f}")
+
+            self.set_left_motor_velocity(phi)
+            self.set_right_motor_velocity(phi)
+            if abs(error) < tolerance :
+                self.stop()
+                break
+
+    # Turns the robot to a specified angle using a PID controller based on the compass reading
+    # (+degrees = counterclockwise, -degrees = clockwise)
+    def turn_pid_compass(self, angle = 180, Kp = 1.0, Ki = 0.01, Kd = 0.05, tolerance = 0.001):
+        I = 0
+        prev_error = 0
+        net_delta = 0
+        prev_compass = self.get_compass_reading()
+        while self.experiment_supervisor.step(self.timestep) != -1:
+            delta = self.get_compass_reading() - prev_compass
+            if delta > 180:
+                delta -= 360
+            elif delta < -180:
+                delta += 360
+            net_delta += delta
+            prev_compass = self.get_compass_reading()
+            error = angle - net_delta
+
+            print("Turning PID Compass:")
+            print(f"Turning {'counterclockwise' if angle > 0 else 'clockwise'}")
+            print(f"Current net delta: {net_delta:.4f}, Error: {error:.4f}")
+
+            # Recalibrates Kp/i/d to account for wheel distance traveled
+            # for easy compatibility with other PID functions
+            r = (math.pi / 180) * self.robot_radius # Distance per compass degree turned
+            P = Kp * r * error
+            I = Ki * r * (I + error * self.timestep)
+            D = Kd * r * (error - prev_error) / self.timestep
+            prev_error = error
+            phi = self.saturation(P + I + D)
+
+            print(f"P: {P:.4f}, I: {I:.4f}, D: {D:.4f}")
+            print(f"PID output (phi): {phi:.4f}")
+            print(f"Left wheel speed: {-1 * phi:.4f}, Right wheel speed: {phi:.4f}")
+
+            self.set_left_motor_velocity(-1 * phi)
+            self.set_right_motor_velocity(phi)
+            if abs(error) < tolerance :
+                self.stop()
+                break
+    
+    # Follows a wall on its left (side = 0) or right (side = 1) using a PID controller based on the lidar reading
+    def wall_follow_pid(self, side = 0, Df = 1, Kpf = 10.0, Ds = 0.5, Kps = 5.0, tolerance = 0.001):
+        while self.experiment_supervisor.step(self.timestep) != -1:
+            error = self.get_lidar_range_image()[180] - Df
+            phi = self.saturation(Kpf * error)
+            side_distance = min(self.get_lidar_range_image()[80 + 180*side:100 + 180*side])
+            side_error = side_distance - Ds
+            if side_error < 0:
+                delta_phi_l = Kps * side_error
+                delta_phi_r = -Kps * side_error
+            if side_error > 0:
+                delta_phi_l = -Kps * side_error
+                delta_phi_r = Kps * side_error
+            else:
+                delta_phi_l = 0
+                delta_phi_r = 0
+            self.set_left_motor_velocity(phi + delta_phi_l)
+            self.set_right_motor_velocity(phi + delta_phi_r)
