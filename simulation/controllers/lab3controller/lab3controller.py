@@ -15,3 +15,4 @@ robot.load_environment(maze_file)
 # Show basic robot/supervisor functions
 robot.move_to_start()
 
+robot.wall_follow_pid()

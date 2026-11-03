@@ -170,7 +170,7 @@ class MyRobot(HamBot):
         while self.experiment_supervisor.step(self.timestep) != -1:
             error = self.get_lidar_range_image()[180] - distance
 
-            print("Moving with PID Lidar:")
+            print("\nMoving with PID Lidar:")
             print(f"Current Lidar Reading: {self.get_lidar_range_image()[180]:.4f}, Error: {error:.4f}")
 
             P = Kp * error
@@ -198,7 +198,7 @@ class MyRobot(HamBot):
             current = (self.get_left_motor_encoder_reading() + self.get_right_motor_encoder_reading()) / 2
             error = distance - (current - initial) * self.wheel_radius
 
-            print("Moving with PID Encoder:")
+            print("\nMoving with PID Encoder:")
             print(f"Moving {'forward' if error > 0 else 'backward'}")
             print(f"Traveled Distance: {(current - initial) * self.wheel_radius:.4f}, Error: {error:.4f}")
 
@@ -234,7 +234,7 @@ class MyRobot(HamBot):
             prev_compass = self.get_compass_reading()
             error = angle - net_delta
 
-            print("Turning PID Compass:")
+            print("\nTurning PID Compass:")
             print(f"Turning {'counterclockwise' if angle > 0 else 'clockwise'}")
             print(f"Current net delta: {net_delta:.4f}, Error: {error:.4f}")
 
@@ -258,20 +258,21 @@ class MyRobot(HamBot):
                 break
     
     # Follows a wall on its left (side = 0) or right (side = 1) using a PID controller based on the lidar reading
-    def wall_follow_pid(self, side = 0, Df = 1, Kpf = 10.0, Ds = 0.5, Kps = 5.0, tolerance = 0.001):
+    def wall_follow_pid(self, side = 0, Df = 1, Kpf = 10.0, Ds = 0.5, Kps = 1.0, tolerance = 0.001):
         while self.experiment_supervisor.step(self.timestep) != -1:
-            error = self.get_lidar_range_image()[180] - Df
+            front_distance = self.get_lidar_range_image()[180]
+            error = front_distance - Df
             phi = self.saturation(Kpf * error)
-            side_distance = min(self.get_lidar_range_image()[80 + 180*side:100 + 180*side])
+            side_distance = min(self.get_lidar_range_image()[90 + 180*side:100 + 180*side])
             side_error = side_distance - Ds
-            if side_error < 0:
-                delta_phi_l = Kps * side_error
-                delta_phi_r = -Kps * side_error
-            if side_error > 0:
-                delta_phi_l = -Kps * side_error
-                delta_phi_r = Kps * side_error
-            else:
-                delta_phi_l = 0
-                delta_phi_r = 0
+            
+            delta_phi_l = -Kps * side_error
+            delta_phi_r = Kps * side_error
+
+            print(f"\n{'Left' if side == 0 else 'Right'} Wall Following PID:")
+            print(f"Front - Desired Distance: {Df:.4f}, Actual Distance: {front_distance:.4f}, Error: {error:.4f}")
+            print(f"Side -  Desired Distance: {Ds:.4f}, Actual Distance: {side_distance:.4f}, Error: {side_error:.4f}")
+            print(f"Motors - Phi: {phi:.4f}, Delta Phi L: {delta_phi_l:.4f}, Delta Phi R: {delta_phi_r:.4f}")
+
             self.set_left_motor_velocity(phi + delta_phi_l)
             self.set_right_motor_velocity(phi + delta_phi_r)
