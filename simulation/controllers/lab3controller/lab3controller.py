@@ -15,7 +15,7 @@ robot.load_environment(maze_file)
 # Show basic robot/supervisor functions
 robot.move_to_start()
 
-wall = 0 #Left
+wall = 1 #Right
 prev_state = "MTG"
 state = "MTG"
 prev_error = 0

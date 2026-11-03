@@ -278,14 +278,14 @@ class MyRobot(HamBot):
         return phi_left, phi_right
   
     # Follows a wall on its left (side = 0) or right (side = 1) using a PID controller based on the lidar reading
-    def wall_follow_pid(self, side = 0, Df = 0.2, Kpf = 10.0, Ds = 0.5, Kps = 6, Kds = 0.5, prev_error = 0):
+    def wall_follow_pid(self, side = 0, Df = 0.2, Kpf = 10.0, Ds = 0.5, Kps = 5.5, Kds = 0.5, prev_error = 0):
         front_distance = min(self.get_lidar_range_image()[175:185])
         side_distance = min(self.get_lidar_range_image()[80 + 110*side:170 + 110*side])
         turn_amp = 0
 
         # Turns when approaching corners
         if front_distance < Ds + 0.05 or front_distance < side_distance:
-            self.turn_pid_compass(60 if side == 1 else -60)
+            self.turn_pid_compass(45 if side == 1 else -45)
             front_distance = min(self.get_lidar_range_image()[175:185])
             side_distance = min(self.get_lidar_range_image()[80 + 110*side:170 + 110*side])
         
