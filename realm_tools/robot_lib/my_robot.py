@@ -163,6 +163,18 @@ class MyRobot(HamBot):
                 self.stop()
                 break
 
+    # Helper function to calculate PID output
+    def pid_calc(self, error, Kp = 20, Ki = 0, Kd = 0, I = 0, prev_error = 0, label = "PID"):
+        P = Kp * error
+        I = Ki * (I + error * self.timestep)
+        D = Kd * (error - prev_error) / self.timestep
+        prev_error = error
+        phi = self.saturation(P + I + D)
+        print(f"{label} - Error: {error:.4f}")
+        print(f"{label} - P: {P:.4f}, I: {I:.4f}, D: {D:.4f}")
+        print(f"{label} - PID output (phi): {phi:.4f}")
+        return phi, I, prev_error
+
     # Moves the robot towards a specified distance using a PID controller based on the lidar reading
     def move_pid_lidar(self, distance = 1, Kp = 10.0, Ki = 0.1, Kd = 0.5, tolerance = 0.001):
         I = 0
@@ -173,14 +185,7 @@ class MyRobot(HamBot):
             print("\nMoving with PID Lidar:")
             print(f"Current Lidar Reading: {self.get_lidar_range_image()[180]:.4f}, Error: {error:.4f}")
 
-            P = Kp * error
-            I = Ki * (I + error * self.timestep)
-            D = Kd * (error - prev_error) / self.timestep
-            prev_error = error
-            phi = self.saturation(P + I + D)
-
-            print(f"P: {P:.4f}, I: {I:.4f}, D: {D:.4f}")
-            print(f"PID output (phi): {phi:.4f}")
+            phi, I, prev_error = self.pid_calc(error, Kp, Ki, Kd, I, prev_error)
 
             self.set_left_motor_velocity(phi)
             self.set_right_motor_velocity(phi)
@@ -202,14 +207,7 @@ class MyRobot(HamBot):
             print(f"Moving {'forward' if error > 0 else 'backward'}")
             print(f"Traveled Distance: {(current - initial) * self.wheel_radius:.4f}, Error: {error:.4f}")
 
-            P = Kp * error
-            I = Ki * (I + error * self.timestep)
-            D = Kd * (error - prev_error) / self.timestep
-            prev_error = error
-            phi = self.saturation(P + I + D)
-
-            print(f"P: {P:.4f}, I: {I:.4f}, D: {D:.4f}")
-            print(f"PID output (phi): {phi:.4f}")
+            phi, I, prev_error = self.pid_calc(error, Kp, Ki, Kd, I, prev_error)
 
             self.set_left_motor_velocity(phi)
             self.set_right_motor_velocity(phi)
@@ -219,7 +217,7 @@ class MyRobot(HamBot):
 
     # Turns the robot to a specified angle using a PID controller based on the compass reading
     # (+degrees = counterclockwise, -degrees = clockwise)
-    def turn_pid_compass(self, angle = 180, Kp = 1.0, Ki = 0.01, Kd = 0.05, tolerance = 0.001):
+    def turn_pid_compass(self, angle = 180, Kp = 10.0, Ki = 0.1, Kd = 0.5, tolerance = 0.001):
         I = 0
         prev_error = 0
         net_delta = 0
@@ -238,17 +236,12 @@ class MyRobot(HamBot):
             print(f"Turning {'counterclockwise' if angle > 0 else 'clockwise'}")
             print(f"Current net delta: {net_delta:.4f}, Error: {error:.4f}")
 
-            # Recalibrates Kp/i/d to account for wheel distance traveled
+            # Recalibrates Kp/Ki/Kd to account for wheel distance traveled
             # for easy compatibility with other PID functions
             r = (math.pi / 180) * self.robot_radius # Distance per compass degree turned
-            P = Kp * r * error
-            I = Ki * r * (I + error * self.timestep)
-            D = Kd * r * (error - prev_error) / self.timestep
-            prev_error = error
-            phi = self.saturation(P + I + D)
 
-            print(f"P: {P:.4f}, I: {I:.4f}, D: {D:.4f}")
-            print(f"PID output (phi): {phi:.4f}")
+            phi, I, prev_error = self.pid_calc(error, Kp * r, Ki * r, Kd * r, I, prev_error)
+
             print(f"Left wheel speed: {-1 * phi:.4f}, Right wheel speed: {phi:.4f}")
 
             self.set_left_motor_velocity(-1 * phi)
@@ -256,23 +249,77 @@ class MyRobot(HamBot):
             if abs(error) < tolerance :
                 self.stop()
                 break
-    
+
+    # Robot moves to a goal and stops a specified distance away using a PID controller based on the lidar reading
+    def find_goal(self, distance = 0.25, Kp = 0.2):
+        landmarks = self.camera.getRecognitionObjects()
+        if len(landmarks) >= 1:
+            forward_distance = self.get_lidar_range_image()[180]
+            forward_distance = forward_distance if not math.isinf(forward_distance) else 100
+            error = forward_distance - distance
+            phi = self.pid_calc(error, label = "Find Goal Forward")[0]
+            goal = landmarks[0]
+            goal_x = goal.getPositionOnImage()[0]
+            midpoint = self.camera.getWidth() / 2
+
+            error = goal_x - midpoint
+
+            delta_left = self.pid_calc(error, Kp, label = "Find Goal Turning")[0]
+            delta_right = -delta_left
+
+            phi_left = phi + delta_left
+            phi_right = phi + delta_right
+
+        else:
+            phi_left = -5
+            phi_right = 5
+        phi_left = self.saturation(phi_left)
+        phi_right = self.saturation(phi_right)
+        return phi_left, phi_right
+  
     # Follows a wall on its left (side = 0) or right (side = 1) using a PID controller based on the lidar reading
-    def wall_follow_pid(self, side = 0, Df = 1, Kpf = 10.0, Ds = 0.5, Kps = 1.0, tolerance = 0.001):
-        while self.experiment_supervisor.step(self.timestep) != -1:
-            front_distance = self.get_lidar_range_image()[180]
-            error = front_distance - Df
-            phi = self.saturation(Kpf * error)
-            side_distance = min(self.get_lidar_range_image()[90 + 180*side:100 + 180*side])
-            side_error = side_distance - Ds
-            
-            delta_phi_l = -Kps * side_error
-            delta_phi_r = Kps * side_error
+    def wall_follow_pid(self, side = 0, Df = 0.2, Kpf = 10.0, Ds = 0.5, Kps = 6, Kds = 0.5, prev_error = 0):
+        front_distance = min(self.get_lidar_range_image()[175:185])
+        side_distance = min(self.get_lidar_range_image()[80 + 110*side:170 + 110*side])
+        turn_amp = 0
 
-            print(f"\n{'Left' if side == 0 else 'Right'} Wall Following PID:")
-            print(f"Front - Desired Distance: {Df:.4f}, Actual Distance: {front_distance:.4f}, Error: {error:.4f}")
-            print(f"Side -  Desired Distance: {Ds:.4f}, Actual Distance: {side_distance:.4f}, Error: {side_error:.4f}")
-            print(f"Motors - Phi: {phi:.4f}, Delta Phi L: {delta_phi_l:.4f}, Delta Phi R: {delta_phi_r:.4f}")
+        # Turns when approaching corners
+        if front_distance < Ds + 0.05 or front_distance < side_distance:
+            self.turn_pid_compass(60 if side == 1 else -60)
+            front_distance = min(self.get_lidar_range_image()[175:185])
+            side_distance = min(self.get_lidar_range_image()[80 + 110*side:170 + 110*side])
+        
 
-            self.set_left_motor_velocity(phi + delta_phi_l)
-            self.set_right_motor_velocity(phi + delta_phi_r)
+        front_distance = front_distance if not math.isinf(front_distance) else 100
+        error = front_distance - Df
+        phi = self.pid_calc(error, Kpf, label = "Wall Following Front")[0]
+
+        side_distance = side_distance if not math.isinf(side_distance) else 100
+        side_error = side_distance - Ds
+
+        label = f"Wall Following Side {'Left' if side == 0 else 'Right'}"
+        delta_phi_l = self.pid_calc(side_error, Kps, Kd = Kds, label = label)[0] * (1 if side == 1 else -1)
+        delta_phi_r = -delta_phi_l
+
+        phi_left = phi + delta_phi_l - turn_amp
+        phi_right = phi + delta_phi_r + turn_amp
+        phi_left = self.saturation(phi_left)
+        phi_right = self.saturation(phi_right)
+
+        return phi_left, phi_right, error
+
+    def bug_0(self, state):
+        if state == "MTG":
+            if (len(self.camera.getRecognitionObjects()) == 0 and min(self.get_lidar_range_image()[100:260]) < 0.8):
+                return "WF"
+            elif (len(self.camera.getRecognitionObjects()) == 1 and min(self.get_lidar_range_image()[170:190]) < 0.27):
+                return "Done"
+            else:
+                return "MTG"
+        elif state == "WF":
+            if len(self.camera.getRecognitionObjects()) > 0:
+                return "MTG"
+            else:
+                return "WF"
+        else:
+            return "DONE"
